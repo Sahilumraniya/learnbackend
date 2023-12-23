@@ -16,7 +16,7 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto",
         });
         // console.log("File is Uploaded on Cloudinary", fileRespones.url);
-        if(!fileRespones){
+        if (!fileRespones) {
             throw Error("File not uploaded");
         }
         fs.unlinkSync(localFilePath);
@@ -27,4 +27,20 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-export { uploadOnCloudinary };
+const deleteOnCloudinary = async (cloudinaryUrl) => {
+    try {
+        if (!cloudinaryUrl) return;
+        const pubilcId = cloudinaryUrl.split("/")[7].split(".")[0];
+        console.log(pubilcId);
+        const deleteRespones = await cloudinary.api.delete_resources(pubilcId);
+        console.log(deleteRespones);
+        if (!deleteRespones) {
+            throw Error("Faild to delete file on cloudinary");
+        }
+    } catch (error) {
+        console.log("Faild to delete file on cloudinary");
+        return null;
+    }
+};
+
+export { uploadOnCloudinary, deleteOnCloudinary };

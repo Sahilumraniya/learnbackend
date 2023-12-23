@@ -1,7 +1,7 @@
 import { asynchandler } from "../utils/asyncHamdler.js";
 import { ApiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiRespones.js";
 import jwt from "jsonwebtoken";
 
@@ -254,13 +254,16 @@ const updateAvatar = asynchandler(async (req, res) => {
         throw new ApiError(400, "Avatar file is missing");
     }
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+    const preurl = req.user?.avatar;
+    // console.log(coverImage);
+    await deleteOnCloudinary(preurl);
     if (!avatar.url) {
         throw new ApiError(500, "Error while uploading on avatar");
     }
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
-            $set: { avatar },
+            $set: { avatar: avatar.url },
         },
         { new: true }
     ).select("-password");
@@ -275,15 +278,19 @@ const updateCoverImage = asynchandler(async (req, res) => {
     if (!coverImageLocalPath) {
         throw new ApiError(400, "Cover Image file is missing");
     }
+    console.log(coverImageLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    if (!coverImage.path) {
+    const preurl = req.user?.coverImage;
+    // console.log(coverImage);
+    await deleteOnCloudinary(preurl);
+    if (!coverImage.url) {
         throw new ApiError(500, "Error while uploading cover image");
     }
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
-                coverImage,
+                coverImage: coverImage.url,
             },
         },
         { new: true }
