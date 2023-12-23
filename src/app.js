@@ -28,7 +28,7 @@ app.use(cookieParser());
 //import all router
 import userRouter from "./routes/user.route.js";
 
-//royter delecation
+//router delecation
 app.use("/api/v1/users", userRouter);
 
 export default app;

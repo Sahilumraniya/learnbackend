@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import Jwt from "jsonwebtoken";
-import bctypt from "bcryptjs";
+import Jwt from "jsonwebtoken"; // generate token
+import bctypt from "bcryptjs"; // hash password
 
 const userSchema = new mongoose.Schema(
     {
-        userSchema: {
+        username: {
             type: String,
             lowecase: true,
             require: true,
@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+    if (!this.isModified("password")) return next(); // if user is not modified password then return next
     this.password = await bctypt.hash(this.password, 10);
     next();
 });
@@ -61,11 +61,12 @@ userSchema.methods.isPasswordCorrect = async function (password) {
     return await bctypt.compare(password, this.password);
 };
 
+
 userSchema.methods.generateAccessToken = function () {
     return Jwt.sign(
         {
             _id: this._id,
-            emial: this.email,
+            email: this.email,
             usernaame: this.username,
             fullName: this.fullName,
         },
