@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiRespones.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessAndRefereshToken = async (userId) => {
     try {
@@ -300,6 +301,12 @@ const updateCoverImage = asynchandler(async (req, res) => {
         .json(new ApiResponse(200, user, "cover image update successfully"));
 });
 
+const getCurrentUser = asynchandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "User fetched successfully"));
+});
+
 const getChannelProfile = asynchandler(async (req, res) => {
     const { username } = req.params;
 
@@ -372,6 +379,58 @@ const getChannelProfile = asynchandler(async (req, res) => {
         );
 });
 
+const getWatchHistory = asynchandler(async (req, res) => {
+    const user = User.aggregate([
+        {
+            $match: mongoose.Types.ObjectId(req.user?._id),
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "videos",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullName: 1,
+                                        username: 1,
+                                        avatar: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner",
+                            },
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user[0].watchHistory,
+                "Watch history fetched successfully"
+            )
+        );
+});
+
 export {
     registerUser,
     loginUser,
@@ -381,5 +440,7 @@ export {
     updateAccountDetails,
     updateAvatar,
     updateCoverImage,
+    getCurrentUser,
     getChannelProfile,
+    getWatchHistory,
 };
