@@ -61,7 +61,6 @@ userSchema.methods.isPasswordCorrect = async function (password) {
     return await bctypt.compare(password, this.password);
 };
 
-
 userSchema.methods.generateAccessToken = function () {
     return Jwt.sign(
         {
@@ -80,7 +79,7 @@ userSchema.methods.generateAccessToken = function () {
 userSchema.methods.generateRefreshToken = function () {
     return Jwt.sign(
         {
-            _id: this._id
+            _id: this._id,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
