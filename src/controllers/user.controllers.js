@@ -1,10 +1,10 @@
 import { asynchandler } from "../utils/asyncHamdler.js";
-import { ApiError } from "../utils/apiError.js";
-import { User } from "../models/user.model.js";
-import { deleteOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiRespones.js";
+import { User } from "../models/user.model.js";
+import { updateOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { ApiError } from "../utils/ApiError.js";
 
 const generateAccessAndRefereshToken = async (userId) => {
     try {
@@ -254,6 +254,7 @@ const updateAvatar = asynchandler(async (req, res) => {
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is missing");
     }
+    /*
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const preurl = req.user?.avatar;
     // console.log(coverImage);
@@ -261,6 +262,8 @@ const updateAvatar = asynchandler(async (req, res) => {
     if (!avatar.url) {
         throw new ApiError(500, "Error while uploading on avatar");
     }
+    */
+    const avatar = await updateOnCloudinary(avatarLocalPath, req.user?.avatar);
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
@@ -280,6 +283,7 @@ const updateCoverImage = asynchandler(async (req, res) => {
         throw new ApiError(400, "Cover Image file is missing");
     }
     console.log(coverImageLocalPath);
+    /*
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
     const preurl = req.user?.coverImage;
     // console.log(coverImage);
@@ -287,6 +291,11 @@ const updateCoverImage = asynchandler(async (req, res) => {
     if (!coverImage.url) {
         throw new ApiError(500, "Error while uploading cover image");
     }
+    */
+    const coverImage = await updateOnCloudinary(
+        coverImageLocalPath,
+        req.user?.coverImage
+    );
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
