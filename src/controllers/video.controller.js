@@ -3,7 +3,11 @@ import { Video } from "../models/video.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiRespones.js";
-import { uploadOnCloudinary, updateOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
+import {
+    uploadOnCloudinary,
+    updateOnCloudinary,
+    deleteOnCloudinary,
+} from "../utils/cloudinary.js";
 import { asynchandler } from "../utils/asyncHamdler.js";
 
 const getAllVideos = asynchandler(async (req, res) => {
@@ -67,6 +71,25 @@ const getVideoById = asynchandler(async (req, res) => {
     if (!video) {
         throw new ApiError(500, "video not found");
     }
+    if (!video.isPublished) {
+        throw new ApiError(404, "video is not published yet");
+    }
+    // increase views when some other hit this api
+    // console.log("User Id : ", req.user?._id.toString());
+    // console.log("Owner Id : ", video.owner.toString());
+    // if (req.user?._id.toString() === video.owner.toString()) {
+    //     console.log("Hey");
+    // }
+    if (req.user?._id.toString() !== video.owner.toString()) {
+        video.views = video.views + 1;
+        await video.save({ validateBeforeSave: true });
+    }
+    // put in user's watch histrory
+    await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: {
+            watchHistory: videoId,
+        },
+    });
     res.status(200).json(new ApiResponse(200, video, "video fetched"));
 });
 
@@ -140,7 +163,7 @@ const deleteVideo = asynchandler(async (req, res) => {
     if (!video) {
         throw new ApiError(500, "video not found");
     }
-    await deleteOnCloudinary(video.videoFile,true);
+    await deleteOnCloudinary(video.videoFile, true);
     await deleteOnCloudinary(video.thumbnail);
     const isDeleted = await Video.findByIdAndDelete(videoId);
     if (!isDeleted) {

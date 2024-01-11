@@ -13,7 +13,7 @@ const toggleVideoLike = asynchandler(async (req, res) => {
     let isLike = await Like.findOne({ video: videoId });
     if (isLike) {
         isLike.video = undefined;
-        isLike.save();
+        await isLike.save();
     } else {
         isLike = await Like.create({
             video: videoId,
@@ -32,7 +32,7 @@ const toggleCommentLike = asynchandler(async (req, res) => {
     let isLike = await Like.findOne({ comment: commentId });
     if (isLike) {
         isLike.comment = undefined;
-        isLike.save();
+        await isLike.save();
     } else {
         isLike = await Like.create({
             comment: commentId,
@@ -51,7 +51,7 @@ const toggleTweetLike = asynchandler(async (req, res) => {
     let isLike = await Like.findOne({ tweet: tweetId });
     if (isLike) {
         isLike.tweet = undefined;
-        isLike.save();
+        await isLike.save();
     } else {
         isLike = await Like.create({
             tweet: tweetId,
