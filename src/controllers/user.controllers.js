@@ -229,7 +229,7 @@ const updatePassword = asynchandler(async (req, res) => {
 
 const updateAccountDetails = asynchandler(async (req, res) => {
     const { fullName, email } = req.body;
-    if (!fullName || !email) {
+    if (!fullName.trim() || !email.trim()) {
         throw new ApiError(400, "All fields are required");
     }
     const user = await User.findByIdAndUpdate(
